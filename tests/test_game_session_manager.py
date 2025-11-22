@@ -251,25 +251,27 @@ class TestGameSessionManager:
         game_manager.join_session(session.session_id, player2)
         game_manager.start_session(session.session_id)
         
-        # Play 3 turns (twist should be added after turn 2, which is turn 3)
+        # Play turns - twist added when turn number % 3 == 0 and turn > 0
+        # Turn 0: No twist (turn == 0)
         game_manager.submit_contribution(
             session.session_id, player1.player_id, "Once", ContributionType.WORD
         )
         assert len(session.story.ai_twists) == 0
         
+        # Turn 1: No twist (1 % 3 != 0)
         game_manager.submit_contribution(
             session.session_id, player2.player_id, "upon a time", ContributionType.PHRASE
         )
         assert len(session.story.ai_twists) == 0
         
+        # Turn 2: No twist (2 % 3 != 0)
         game_manager.submit_contribution(
             session.session_id, player1.player_id, "there was", ContributionType.PHRASE
         )
-        # After turn 2 (0-indexed), twist should be added at turn 3
         assert len(session.story.ai_twists) == 0
         
+        # Turn 3: Twist added (3 % 3 == 0 and 3 > 0)
         game_manager.submit_contribution(
             session.session_id, player2.player_id, "a hero", ContributionType.PHRASE
         )
-        # Now at turn 3, twist should have been added
         assert len(session.story.ai_twists) == 1

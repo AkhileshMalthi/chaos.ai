@@ -64,12 +64,24 @@ class Story:
     created_at: datetime = field(default_factory=datetime.now)
     
     def get_full_text(self) -> str:
-        """Get the complete story text"""
+        """Get the complete story text with twists in chronological order"""
         parts = []
+        twist_index = 0
+        
         for contribution in self.contributions:
             parts.append(contribution.content)
-        for twist in self.ai_twists:
-            parts.append(twist.content)
+            
+            # Check if any twists should be inserted after this contribution
+            while (twist_index < len(self.ai_twists) and 
+                   self.ai_twists[twist_index].applied_after_turn <= contribution.turn_number):
+                parts.append(self.ai_twists[twist_index].content)
+                twist_index += 1
+        
+        # Add any remaining twists
+        while twist_index < len(self.ai_twists):
+            parts.append(self.ai_twists[twist_index].content)
+            twist_index += 1
+        
         return " ".join(parts)
 
 
